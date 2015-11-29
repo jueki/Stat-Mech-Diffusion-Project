@@ -61,11 +61,31 @@ class Particle:
 
 class Grid:
     """The 3d grid that holds the position of each partice"""
+    
     def __init__(self, length):
         """A 3D cube with each length^3 many cells"""
         self.cell = [[[]*length for x in range(length)] for y in range(length)]
         self.length = length
         
+        
+    def inGrid(x, y, z):
+        """Checks if this continous position is a valid position inside the grid"""
+        gridPos = CTG([x,y,z])
+        x = gridPos[0]
+        y = gridPos[1]
+        z = gridPos[2]
+        
+        if (x < 0 or x >= length):
+            return False
+        
+        elif (y < 0 or y >= length):
+            return False
+        
+        elif (z < 0 or z >= length):
+            return False
+            
+        else:  
+            return True
         
     def CTG(position):
         """Takes the continous position and transforms it into
@@ -76,8 +96,6 @@ class Grid:
         
         return [xGrid, yGrid, zGrid]
         
-        
-        
     
     def getParticles(self, x, y, z):
         """Gets all of the particles in the cell at position (x, y, z)"""
@@ -85,7 +103,7 @@ class Grid:
     
     def push(thisParticle):
         """Push a particle into a cell in the grid"""
-        gridPos = CTG(thisParticle.position)
+        gridPos = CTG(thisParticle.position())
         xPos = gridPos[0]
         yPos = gridPos[1]
         zPos = gridPos[2]
@@ -93,6 +111,27 @@ class Grid:
         self.cell[xPos][yPos][zPos].append(thisParticle)
         
 
+class Simulation:
+    def __init__(self, length):
+        self.grid = Grid(length)
+        self.particles = []
+        
+        
+    def oneCellCollision(particle, xGrid, yGrid, zGrid):
+        """Checks if this particle collided with a neighbor whose cell
+            is at the grid indicies xGrid, yGrid, zGrid"""
+            
+        neighbors = self.grid.getParticles(xGrid, yGrid, zGrid)
+        
+        # If any of those particles collided, return true
+        for (other in neighbors):
+            if (particle.collided(other)):
+                return True
+                
+        # If not collision occured, returned false
+        return False
+            
+        
 
 # setting up 3d figure
 fig = plt.figure()
