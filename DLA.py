@@ -53,48 +53,6 @@ class Particle:
 		""" moves the particle by dr in random direction """
 		newPosition = self.position + randomPosition(dr)
 		self.move(newPosition)
-  
-  
-    def position(self):
-        """Returns the (x,y,z) position of the particle"""
-        return self.position
-
-class Grid:
-    """The 3d grid that holds the position of each partice"""
-    def __init__(self, length):
-        """A 3D cube with each length^3 many cells"""
-        self.cell = [[[]*length for x in range(length)] for y in range(length)]
-        self.length = length
-        
-        
-    def CTG(position):
-        """Takes the continous position of the particle and transforms it into
-            a position in the grid"""
-        xGrid = int(position[0]) + (self.length/2)
-        yGrid = int(position[1]) + (self.length/2)
-        zGrid = int(position[2]) + (self.length/2)
-        
-        return [xGrid, yGrid, zGrid]
-        
-        
-        
-    
-    def getParticles(self, x, y, z):
-        """Gets all of the particles in the cell at position (x, y, z)"""
-        return self.cell[x][y][z]
-    
-    def push(thisParticle):
-        """Push a particle into a cell in the grid"""
-        gridPos = CTG(thisParticle.position)
-        xPos = gridPos[0]
-        yPos = gridPos[1]
-        zPos = gridPos[2]
-        
-        self.cell[xPos][yPos][zPos].append(thisParticle)
-        
-        
-        
-    
 
 # setting up 3d figure
 fig = plt.figure()
