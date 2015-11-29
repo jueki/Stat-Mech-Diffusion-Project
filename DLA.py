@@ -92,12 +92,7 @@ class Grid:
         
         self.cell[xPos][yPos][zPos].append(thisParticle)
         
-        
-<<<<<<< HEAD
-=======
-        
-    
->>>>>>> parent of 080765f... Revert "Added a Grid Class"
+
 
 # setting up 3d figure
 fig = plt.figure()
