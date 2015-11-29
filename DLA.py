@@ -112,9 +112,10 @@ class Grid:
         
 
 class Simulation:
-    def __init__(self, length):
+    def __init__(self, length, stepSize):
         self.grid = Grid(length)
-        self.particles = []
+        self.allParticles = [] #A list of all of the particles existing
+        self.stepSize = stepSize
         
         
     def oneCellCollision(particle, xGrid, yGrid, zGrid):
@@ -132,6 +133,32 @@ class Simulation:
         return False
             
         
+    def collision(particle):
+        """Checks if a particle has collided with any particle in all 26
+            neighboring cells"""
+            
+        #TODO
+            
+    def inBounds(particle):
+        """Checks if the particle is within the boundry, where the boundry
+            is when we decided the particle wandered off too far"""
+        #TODO
+    
+    def newParticle()):
+        """Creates a new particle and evolves it until it collides with seed"""
+        particle = Particle()
+        
+        while(not collision(particle) and inBounds(particle)):
+            particle.step(stepSize)
+        
+        # If the particle is still inbounds, that means it collided with the seed
+        # So fix it into the grid and append it to the list of existing particles
+        if (inBounds(particle)):
+            allParticles.append(particle)
+            self.grid.push(particle)
+            particle.fix()
+            
+            
 
 # setting up 3d figure
 fig = plt.figure()
