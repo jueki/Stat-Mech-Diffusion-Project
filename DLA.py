@@ -54,40 +54,42 @@ class Particle:
 		newPosition = self.position + randomPosition(dr)
 		self.move(newPosition)
   
+	def getPosition(self):
+		""" Returns the (x,y,z) position of the particle """
+		return self.position
   
-     def position(self):
-        """Returns the (x,y,z) position of the particle"""
-        return self.position
+
 
 class Grid:
     """The 3d grid that holds the position of each partice"""
     
     def __init__(self, length):
         """A 3D cube with each length^3 many cells"""
-        self.cell = [[[]*length for x in range(length)] for y in range(length)]
+        self.cell = [[[[]*length for x in range(length)] for y in range(length)]
+                    for z in range(length)]
         self.length = length
         
         
-    def inGrid(x, y, z):
+    def inGrid(self, x, y, z):
         """Checks if this continous position is a valid position inside the grid"""
-        gridPos = CTG([x,y,z])
+        gridPos = self.CTG([x,y,z])
         x = gridPos[0]
         y = gridPos[1]
         z = gridPos[2]
         
-        if (x < 0 or x >= length):
+        if (x < 0 or x >= self.length):
             return False
         
-        elif (y < 0 or y >= length):
+        elif (y < 0 or y >= self.length):
             return False
         
-        elif (z < 0 or z >= length):
+        elif (z < 0 or z >= self.length):
             return False
             
         else:  
             return True
         
-    def CTG(position):
+    def CTG(self, position):
         """Takes the continous position and transforms it into
             a position in the grid"""
         xGrid = int(position[0]) + (self.length/2)
@@ -101,14 +103,16 @@ class Grid:
         """Gets all of the particles in the cell at position (x, y, z)"""
         return self.cell[x][y][z]
     
-    def push(thisParticle):
+    def push(self, thisParticle):
         """Push a particle into a cell in the grid"""
-        gridPos = CTG(thisParticle.position())
+        gridPos = self.CTG(thisParticle.getPosition())
         xPos = gridPos[0]
         yPos = gridPos[1]
         zPos = gridPos[2]
         
         self.cell[xPos][yPos][zPos].append(thisParticle)
+        
+        
         
 
 class Simulation:
@@ -116,6 +120,7 @@ class Simulation:
         self.grid = Grid(length)
         self.allParticles = [] #A list of all of the particles existing
         self.stepSize = stepSize
+        self.length = length
         
         seed = Particle()
         
@@ -126,13 +131,14 @@ class Simulation:
         
 
         
-    def collision(current, grid):
+    def collision(self, current):
         """Checks if a particle has collided with any particle in all 26
             neighboring cells"""
-        pos = current.position
-        x = self.grid.CTG(pos)[0]
-        y = self.grid.CTG(pos)[1]
-        z = self.grid.CTG(pos)[2]
+        pos = current.getPosition()
+        pos = self.grid.CTG(pos)
+        x = pos[0]
+        y = pos[1]
+        z = pos[2]
         for i in range(3):
             for j in range(3):
                 for k in range(3):
@@ -143,10 +149,10 @@ class Simulation:
                         else:
                             return False
             
-    def inBounds(particle):
+    def inBounds(self, particle):
         """Checks if the particle is within the boundry, where the boundry
             is when we decided the particle wandered off too far"""
-        pos = particle.position()
+        pos = particle.getPosition()
         x = self.grid.CTG(pos)[0]
         y = self.grid.CTG(pos)[1]
         z = self.grid.CTG(pos)[2]
@@ -165,27 +171,31 @@ class Simulation:
         else:
             return True
     
-    def newParticle()):
+    def newParticle(self):
         """Creates a new particle and evolves it until it collides with seed"""
-        particle = Particle()
+        particle = Particle(randomPosition(rSpawn),radius=1,free=True)
         
-        while(not collision(particle) and inBounds(particle)):
-            particle.step(stepSize)
+        while(not self.collision(particle) and self.inBounds(particle)):
+            particle.step(self.stepSize)
         
         # If the particle is still inbounds, that means it collided with the seed
         # So fix it into the grid and append it to the list of existing particles
-        if (inBounds(particle)):
-            allParticles.append(particle)
+        if (self.inBounds(particle)):
+            self.allParticles.append(particle)
             self.grid.push(particle)
             particle.fix()
             
             
-    def run(numParticles):
+    def run(self, numParticles):
         """Runs the simulation until we have a certain amount of particles stuck
             to the seed"""
             
-        while(len(self.allParticles <= numParticles)):
+        while(len(self.allParticles) <= numParticles):
             self.newParticle()
+            
+    def getParticles(self):
+        """Returns all of the particles in the simulation"""
+        return self.allParticles
             
 
 # setting up 3d figure
