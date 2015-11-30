@@ -133,11 +133,22 @@ class Simulation:
         return False
             
         
-    def collision(particle):
+    def collision(particle, grid):
         """Checks if a particle has collided with any particle in all 26
             neighboring cells"""
-            
-        #TODO
+        pos = current.position
+        x = grid.CTG(pos)[0]
+        y = grid.CTG(pos)[1]
+        z = grid.CTG(pos)[2]
+        for i in range(3):
+            for j in range(3):
+                for k in range(3):
+                    currentCell = grid.cell[x-1+i][y-1+j][z-1+k]
+                    for l in range(len(currentCell)):
+                        if(currentCell[l].collided(current)):
+                            return True
+                        else:
+                            return False
             
     def inBounds(particle):
         """Checks if the particle is within the boundry, where the boundry
