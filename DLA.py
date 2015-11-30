@@ -55,7 +55,7 @@ class Particle:
 		self.move(newPosition)
   
   
-    def position(self):
+     def position(self):
         """Returns the (x,y,z) position of the particle"""
         return self.position
 
@@ -117,19 +117,26 @@ class Simulation:
         self.allParticles = [] #A list of all of the particles existing
         self.stepSize = stepSize
         
+        seed = Particle()
+        
+        #Create a seed at (0,0,0)
+        self.grid.push(seed)
+        self.allParticles.append(seed)
+        
+        
 
         
     def collision(current, grid):
         """Checks if a particle has collided with any particle in all 26
             neighboring cells"""
         pos = current.position
-        x = grid.CTG(pos)[0]
-        y = grid.CTG(pos)[1]
-        z = grid.CTG(pos)[2]
+        x = self.grid.CTG(pos)[0]
+        y = self.grid.CTG(pos)[1]
+        z = self.grid.CTG(pos)[2]
         for i in range(3):
             for j in range(3):
                 for k in range(3):
-                    currentCell = grid.cell[x-1+i][y-1+j][z-1+k]
+                    currentCell = self.grid.cell[x-1+i][y-1+j][z-1+k]
                     for l in range(len(currentCell)):
                         if(currentCell[l].collided(current)):
                             return True
@@ -139,7 +146,24 @@ class Simulation:
     def inBounds(particle):
         """Checks if the particle is within the boundry, where the boundry
             is when we decided the particle wandered off too far"""
-        #TODO
+        pos = particle.position()
+        x = self.grid.CTG(pos)[0]
+        y = self.grid.CTG(pos)[1]
+        z = self.grid.CTG(pos)[2]
+        
+        # Bounds are one less than the grid size in order to prevent out of bounds
+        # error during collision check
+        if x < 0 or x >= self.length-1:
+            return False
+            
+        elif y < 0 or y >= self.length-1:
+            return False
+            
+        elif z < 0 or z >= self.length-1:
+            return False
+            
+        else:
+            return True
     
     def newParticle()):
         """Creates a new particle and evolves it until it collides with seed"""
@@ -155,6 +179,13 @@ class Simulation:
             self.grid.push(particle)
             particle.fix()
             
+            
+    def run(numParticles):
+        """Runs the simulation until we have a certain amount of particles stuck
+            to the seed"""
+            
+        while(len(self.allParticles <= numParticles)):
+            self.newParticle()
             
 
 # setting up 3d figure
