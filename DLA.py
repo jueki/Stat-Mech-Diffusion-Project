@@ -117,23 +117,9 @@ class Simulation:
         self.allParticles = [] #A list of all of the particles existing
         self.stepSize = stepSize
         
+
         
-    def oneCellCollision(particle, xGrid, yGrid, zGrid):
-        """Checks if this particle collided with a neighbor whose cell
-            is at the grid indicies xGrid, yGrid, zGrid"""
-            
-        neighbors = self.grid.getParticles(xGrid, yGrid, zGrid)
-        
-        # If any of those particles collided, return true
-        for (other in neighbors):
-            if (particle.collided(other)):
-                return True
-                
-        # If not collision occured, returned false
-        return False
-            
-        
-    def collision(particle, grid):
+    def collision(current, grid):
         """Checks if a particle has collided with any particle in all 26
             neighboring cells"""
         pos = current.position
