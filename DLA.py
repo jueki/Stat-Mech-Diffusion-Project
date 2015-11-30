@@ -196,6 +196,11 @@ class Simulation:
     def getParticles(self):
         """Returns all of the particles in the simulation"""
         return self.allParticles
+        
+    def printParticlePositions(self):
+        print("Positions: ")
+        for x in range(len(self.allParticles)):
+            print(self.allParticles[x].getPosition())
             
 
 # setting up 3d figure
