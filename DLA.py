@@ -92,9 +92,9 @@ class Grid:
     def CTG(self, position):
         """Takes the continous position and transforms it into
             a position in the grid"""
-        xGrid = int(position[0]) + (self.length/2)
-        yGrid = int(position[1]) + (self.length/2)
-        zGrid = int(position[2]) + (self.length/2)
+        xGrid = int((position[0]) + (self.length/2))
+        yGrid = int((position[1]) + (self.length/2))
+        zGrid = int((position[2]) + (self.length/2))
         
         return [xGrid, yGrid, zGrid]
         
@@ -175,7 +175,7 @@ class Simulation:
         """Creates a new particle and evolves it until it collides with seed"""
         particle = Particle(randomPosition(rSpawn),radius=1,free=True)
         
-        while(not self.collision(particle) and self.inBounds(particle)):
+        while(self.inBounds(particle) and not self.collision(particle)):
             particle.step(self.stepSize)
         
         # If the particle is still inbounds, that means it collided with the seed
