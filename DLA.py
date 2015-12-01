@@ -228,14 +228,16 @@ def plot(positions,times,radii):
 
 ########## MAIN PROGRAM #############
 length = 20 #length of grid
-rSpawn = 5 #spawn radius
+rSpawn = 7 #spawn radius
 dt = 50 # time step in milliseconds
 dr = 0.25 # distance step
 colRad = .4 #Collision radius
-numParticles = 20
+stickProb = .5
+numParticles = 1000
+
 
 #Set Up the simulation and run it
-sim = Simulation(length, colRad, rSpawn, dr)
+sim = Simulation(length, colRad, rSpawn, dr, stickProb)
 sim.run(numParticles)
 
 #Obtain Particle Information
