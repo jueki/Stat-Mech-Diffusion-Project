@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
 import matplotlib.cm as cm
+import random
 
 def fromSphericalCoordinates(r,theta,phi):
 	""" converts from spherical to cartesian coordinates """
@@ -28,13 +29,19 @@ def randomPosition(r):
 class Particle:
 	""" holds information for a single particle """
 
-	def __init__(self,position=[0,0,0],radius=1,time=0):
+	def __init__(self,position=[0,0,0],radius=1,time=0, stickProb=1):
 		self.position = np.array(position)
 		self.radius = colRad
 		self.time = time
+		self.stickProb = stickProb
 
 	def move(self,newPosition):
 		self.position = np.array(newPosition)
+  
+  
+	def decision(self):
+		""" checks if particle has collided with another particle """
+		return random.random() < self.stickProb
 
 	def collided(self,other):
 		""" checks if particle has collided with another particle """
@@ -42,8 +49,10 @@ class Particle:
 		distance = np.linalg.norm(np.array(self.position) - np.array(other.position))
 		if distance > collisionRadius:
 			return False
-		else:
+		elif self.decision(): #Sticking prob turns to be true
 			return True
+		else: #Sticking prob turn out not to be true
+			return False
 
 	def step(self,dr):
 		""" moves the particle by dr in random direction """
@@ -109,7 +118,7 @@ class Grid:
         self.cell[xPos][yPos][zPos].append(thisParticle)
         
 class Simulation:
-    def __init__(self, length, colRad, spawnRad, stepSize,time=0):
+    def __init__(self, length, colRad, spawnRad, stepSize,time=0, stickProb=1):
 
         self.grid = Grid(length)
         self.allParticles = [] #A list of all of the particles existing
@@ -118,6 +127,7 @@ class Simulation:
         self.time = time
         self.colRad = colRad
         self.spawnRad = spawnRad
+        self.prob = stickProb #the stickign probability
         seed = Particle(radius=self.colRad)
         
         #Create a seed at (0,0,0)
@@ -167,7 +177,7 @@ class Simulation:
     
     def newParticle(self):
         """Creates a new particle and evolves it until it collides with seed"""
-        particle = Particle(randomPosition(self.spawnRad),radius=self.colRad)
+        particle = Particle(randomPosition(self.spawnRad),radius=self.colRad, stickProb=self.prob)
         
         while(self.inBounds(particle) and not self.collision(particle)):
             particle.step(self.stepSize)
