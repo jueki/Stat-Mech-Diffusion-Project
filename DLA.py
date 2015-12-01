@@ -209,14 +209,12 @@ def animate(i):
 #ani = animation.FuncAnimation(fig, animate, interval=dt, blit=False)
 
 def plot(positions,times,radii):
-    for i in range(len(positions)):
-        position = positions[i]
-        time = times[i]
-        radius = radii[i]
-        (x,y,z) = (position[0],position[1],position[2])
-        area = (radius*figsize/length)**2
-        color = cm.rainbow(float(time)/totalTime)
-        ax.scatter(x,y,z,s=area,c=color,edgecolors='face')
+    xs = [p[0] for p in positions]
+    ys = [p[1] for p in positions]
+    zs = [p[2] for p in positions]
+    colors = [cm.rainbow(float(t)/totalTime) for t in times]
+    sizes = [(r*figsize/length)**2 for r in radii]
+    ax.scatter(xs,ys,zs,s=sizes,c=colors,edgecolors='face',alpha=1.0)
 
 ########## MAIN PROGRAM #############
 length = 20 #length of grid
@@ -224,7 +222,7 @@ rSpawn = 5 #spawn radius
 dt = 50 # time step in milliseconds
 dr = 0.25 # distance step
 colRad = .4 #Collision radius
-numParticles = 100
+numParticles = 20
 
 #Set Up the simulation and run it
 sim = Simulation(length, colRad, rSpawn, dr)
