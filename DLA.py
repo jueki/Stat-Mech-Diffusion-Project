@@ -30,7 +30,7 @@ class Particle:
 
 	def __init__(self,position=[0,0,0],radius=1,time=0):
 		self.position = np.array(position)
-		self.radius = radius
+		self.radius = colRad
 		self.time = time
 
 	def move(self,newPosition):
@@ -109,14 +109,16 @@ class Grid:
         self.cell[xPos][yPos][zPos].append(thisParticle)
         
 class Simulation:
-    def __init__(self, length, stepSize,time=0):
+    def __init__(self, length, colRad, spawnRad, stepSize,time=0):
+
         self.grid = Grid(length)
         self.allParticles = [] #A list of all of the particles existing
         self.stepSize = stepSize
         self.length = length
         self.time = time
-        
-        seed = Particle()
+        self.colRad = colRad
+        self.spawnRad = spawnRad
+        seed = Particle(radius=self.colRad)
         
         #Create a seed at (0,0,0)
         self.grid.push(seed)
@@ -165,7 +167,7 @@ class Simulation:
     
     def newParticle(self):
         """Creates a new particle and evolves it until it collides with seed"""
-        particle = Particle(randomPosition(rSpawn),radius=1)
+        particle = Particle(randomPosition(self.spawnRad),radius=self.colRad)
         
         while(self.inBounds(particle) and not self.collision(particle)):
             particle.step(self.stepSize)
@@ -200,7 +202,7 @@ def animate(i):
         time = times.pop(0)
         radius = radii.pop(0)
         (x,y,z) = (position[0],position[1],position[2])
-        area = 1200*(radius*figsize/size)**2
+        area = 1200*(radius*figsize/length)**2
         color = cm.rainbow(float(i*dt)/totalTime)
         ax.scatter(x,y,z,s=area,c=color,edgecolors='face')
 
@@ -212,33 +214,33 @@ def plot(positions,times,radii):
         time = times[i]
         radius = radii[i]
         (x,y,z) = (position[0],position[1],position[2])
-        area = 10000000*(radius/size)**2
+        area = (radius*figsize/length)**2
         color = cm.rainbow(float(time)/totalTime)
         ax.scatter(x,y,z,s=area,c=color,edgecolors='face')
 
 ########## MAIN PROGRAM #############
+length = 20 #length of grid
+rSpawn = 5 #spawn radius
+dt = 50 # time step in milliseconds
+dr = 0.25 # distance step
+colRad = .4 #Collision radius
+numParticles = 100
 
-size = 100 # size of grid
-rSpawn = 50 #spawn radius
-dt = 1 # time step in milliseconds (for animation)
-dr = 5 # distance step
-numParticles = 10 # number of particles
-
-# Run Simulation
-sim = Simulation(size,dr)
+#Set Up the simulation and run it
+sim = Simulation(length, colRad, rSpawn, dr)
 sim.run(numParticles)
 
-# pull out results
+#Obtain Particle Information
 particles = sim.getParticles()
-positions = [part.position for part in particles]
-times = [part.time for part in particles]
-radii = [part.radius for part in particles]
+positions = [p.position for p in particles]
+radii = [p.radius for p in particles]
+times = [p.time for p in particles]
 totalTime = times[-1]
 
 # setting up 3d figure
 fig = plt.figure()
 ax = p3.Axes3D(fig)
-(bx,by,bz) = (size/2,size/2,size/2) # box.bounds
+(bx,by,bz) = (length/2,length/2,length/2) # box.bounds
 ax.set_xlim3d([-bx, bx])
 ax.set_xlabel('x')
 ax.set_ylim3d([-by, by])
@@ -247,7 +249,8 @@ ax.set_zlim3d([-bz, bz])
 ax.set_zlabel('z')
 ax.set_title('DLA Test')
 
-figsize = size = fig.get_size_inches()*fig.dpi
+figsize = fig.get_size_inches()*fig.dpi
 
 plot(positions,times,radii)
+
 plt.show()
