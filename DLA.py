@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
-
+import matplotlib.cm as cm
 
 def fromSphericalCoordinates(r,theta,phi):
 	""" converts from spherical to cartesian coordinates """
@@ -28,14 +28,10 @@ def randomPosition(r):
 class Particle:
 	""" holds information for a single particle """
 
-	def __init__(self,position=[0,0,0],radius=1,free=False,color=(0,0,1)):
+	def __init__(self,position=[0,0,0],radius=1,time=0):
 		self.position = np.array(position)
 		self.radius = radius
-		self.free = free
-		self.color = color
-
-	def fix(self):
-		self.free = False
+		self.time = time
 
 	def move(self,newPosition):
 		self.position = np.array(newPosition)
@@ -112,15 +108,13 @@ class Grid:
         
         self.cell[xPos][yPos][zPos].append(thisParticle)
         
-        
-        
-
 class Simulation:
-    def __init__(self, length, stepSize):
+    def __init__(self, length, stepSize,time=0):
         self.grid = Grid(length)
         self.allParticles = [] #A list of all of the particles existing
         self.stepSize = stepSize
         self.length = length
+        self.time = time
         
         seed = Particle()
         
@@ -128,8 +122,6 @@ class Simulation:
         self.grid.push(seed)
         self.allParticles.append(seed)
         
-        
-
         
     def collision(self, current):
         """Checks if a particle has collided with any particle in all 26
@@ -173,18 +165,18 @@ class Simulation:
     
     def newParticle(self):
         """Creates a new particle and evolves it until it collides with seed"""
-        particle = Particle(randomPosition(rSpawn),radius=1,free=True)
+        particle = Particle(randomPosition(rSpawn),radius=1)
         
         while(self.inBounds(particle) and not self.collision(particle)):
             particle.step(self.stepSize)
+            self.time += dt
         
         # If the particle is still inbounds, that means it collided with the seed
         # So fix it into the grid and append it to the list of existing particles
         if (self.inBounds(particle)):
+            particle.time = self.time
             self.allParticles.append(particle)
             self.grid.push(particle)
-            particle.fix()
-            
             
     def run(self, numParticles):
         """Runs the simulation until we have a certain amount of particles stuck
@@ -201,74 +193,61 @@ class Simulation:
         print("Positions: ")
         for x in range(len(self.allParticles)):
             print(self.allParticles[x].getPosition())
-            
+
+def animate(i):
+    if dt*i in times:
+        position = positions.pop(0)
+        time = times.pop(0)
+        radius = radii.pop(0)
+        (x,y,z) = (position[0],position[1],position[2])
+        area = 1200*(radius*figsize/size)**2
+        color = cm.rainbow(float(i*dt)/totalTime)
+        ax.scatter(x,y,z,s=area,c=color,edgecolors='face')
+
+#ani = animation.FuncAnimation(fig, animate, interval=dt, blit=False)
+
+def plot(positions,times,radii):
+    for i in range(len(positions)):
+        position = positions[i]
+        time = times[i]
+        radius = radii[i]
+        (x,y,z) = (position[0],position[1],position[2])
+        area = 10000000*(radius/size)**2
+        color = cm.rainbow(float(time)/totalTime)
+        ax.scatter(x,y,z,s=area,c=color,edgecolors='face')
+
+########## MAIN PROGRAM #############
+
+size = 100 # size of grid
+rSpawn = 50 #spawn radius
+dt = 1 # time step in milliseconds (for animation)
+dr = 5 # distance step
+numParticles = 10 # number of particles
+
+# Run Simulation
+sim = Simulation(size,dr)
+sim.run(numParticles)
+
+# pull out results
+particles = sim.getParticles()
+positions = [part.position for part in particles]
+times = [part.time for part in particles]
+radii = [part.radius for part in particles]
+totalTime = times[-1]
 
 # setting up 3d figure
 fig = plt.figure()
 ax = p3.Axes3D(fig)
-(bx,by,bz) = (10,10,10) # box.bounds
+(bx,by,bz) = (size/2,size/2,size/2) # box.bounds
 ax.set_xlim3d([-bx, bx])
 ax.set_xlabel('x')
-
 ax.set_ylim3d([-by, by])
 ax.set_ylabel('y')
-
 ax.set_zlim3d([-bz, bz])
 ax.set_zlabel('z')
-
 ax.set_title('DLA Test')
 
+figsize = size = fig.get_size_inches()*fig.dpi
 
-rSpawn = 3 #spawn radius
-dt = 50 # time step in milliseconds
-dr = 0.25 # distance step
-
-time = 0 #starting time
-
-particles = [Particle()] #initial config, one particle fixed at origin
-positions = [p.position for p in particles]
-radii = [p.radius for p in particles]
-colors = [p.color for p in particles]
-
-xs = [p[0] for p in positions]
-ys = [p[1] for p in positions]
-zs = [p[2] for p in positions]
-ax.scatter(xs,ys,zs,s=radii) # plot initial configuration
-
-pFree = Particle(randomPosition(rSpawn),radius=1,free=True) # spawn particle 
-pos = pFree.position
-scat = ax.scatter([pos[0]],[pos[1]],[pos[2]],s=10*radii,c=colors) #plot it
-
-def animate(i):
-	global time
-	time += dt
-	global scat
-	global pFree
-	global particles
-	collide = False
-	for p in particles: # loop through to check for collisions (change this)
-		if pFree.collided(p):
-			collide = True
-	if collide:
-		pFree.fix()
-		particles += [pFree]
-		pFree = Particle(randomPosition(rSpawn),radius=1,free=True) # spawn new particle
-		pos = pFree.position
-		r = pFree.radius
-		xs = [pos[0]]
-		ys = [pos[1]]
-		zs = [pos[2]]
-		scat = ax.scatter(xs,ys,zs,s=r) # plot new particle
-	else:
-		scat.remove() # clear previous plot
-		pFree.step(dr)
-		pos = pFree.position
-		r = pFree.radius
-		xs = [pos[0]]
-		ys = [pos[1]]
-		zs = [pos[2]]
-		scat = ax.scatter(xs,ys,zs,s=r) # replot
-
-# Creating the Animation object
-ani = animation.FuncAnimation(fig, animate, interval=dt, blit=False)
+plot(positions,times,radii)
 plt.show()
