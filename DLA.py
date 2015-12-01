@@ -116,12 +116,13 @@ class Grid:
         
 
 class Simulation:
-    def __init__(self, length, stepSize):
+    def __init__(self, length, colRad, spawnRad, stepSize):
         self.grid = Grid(length)
         self.allParticles = [] #A list of all of the particles existing
         self.stepSize = stepSize
         self.length = length
-        
+        self.colRad = colRad
+        self.spawnRad = spawnRad
         seed = Particle()
         
         #Create a seed at (0,0,0)
@@ -173,7 +174,7 @@ class Simulation:
     
     def newParticle(self):
         """Creates a new particle and evolves it until it collides with seed"""
-        particle = Particle(randomPosition(rSpawn),radius=1,free=True)
+        particle = Particle(randomPosition(self.spawnRad),radius=self.colRad,free=True)
         
         while(self.inBounds(particle) and not self.collision(particle)):
             particle.step(self.stepSize)
@@ -219,13 +220,18 @@ ax.set_zlabel('z')
 ax.set_title('DLA Test')
 
 
-rSpawn = 3 #spawn radius
+length = 20 #length of grid
+rSpawn = 5 #spawn radius
 dt = 50 # time step in milliseconds
 dr = 0.25 # distance step
-
+colRad = .4 #Collision radius
 time = 0 #starting time
 
-particles = [Particle()] #initial config, one particle fixed at origin
+###############SET UP THE INITIAL CONDITION
+sim = Simulation(length, colRad, rSpawn, dr)
+sim.run(500)
+#Initial config, one particle fixed at origin
+particles = sim.getParticles()
 positions = [p.position for p in particles]
 radii = [p.radius for p in particles]
 colors = [p.color for p in particles]
@@ -237,7 +243,7 @@ ax.scatter(xs,ys,zs,s=radii) # plot initial configuration
 
 pFree = Particle(randomPosition(rSpawn),radius=1,free=True) # spawn particle 
 pos = pFree.position
-scat = ax.scatter([pos[0]],[pos[1]],[pos[2]],s=10*radii,c=colors) #plot it
+scat = ax.scatter([pos[0]],[pos[1]],[pos[2]],s=100*radii,c=colors) #plot it
 
 def animate(i):
 	global time
