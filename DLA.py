@@ -226,11 +226,13 @@ dt = 50 # time step in milliseconds
 dr = 0.25 # distance step
 colRad = .4 #Collision radius
 time = 0 #starting time
+numParticles = 500
 
-###############SET UP THE INITIAL CONDITION
+#Set Up the simulation and run it
 sim = Simulation(length, colRad, rSpawn, dr)
-sim.run(500)
-#Initial config, one particle fixed at origin
+sim.run(numParticles)
+
+#Obtain Particle Information
 particles = sim.getParticles()
 positions = [p.position for p in particles]
 radii = [p.radius for p in particles]
