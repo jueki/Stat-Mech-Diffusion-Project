@@ -8,7 +8,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import mpl_toolkits.mplot3d.axes3d as p3
+import mpl_toolkits.mplot3d.axes3d
 import matplotlib.animation as animation
 import matplotlib.cm as cm
 import random
@@ -203,13 +203,25 @@ class Simulation:
         for x in range(len(self.allParticles)):
             print(self.allParticles[x].getPosition())
 
+def drawSphere(xCenter, yCenter, zCenter, r):
+    #draw sphere
+    u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
+    x=np.cos(u)*np.sin(v)
+    y=np.sin(u)*np.sin(v)
+    z=np.cos(v)
+    # shift and scale sphere
+    x = r*x + xCenter
+    y = r*y + yCenter
+    z = r*z + zCenter
+    return (x,y,z)
+
 def plot(positions,times,radii):
     """ Creates 3 different perspective plots of the simulation results """
     # Set up figure
-    fig = plt.figure()
-    ax1 = fig.add_subplot(131, projection='3d')
-    ax2 = fig.add_subplot(132, projection='3d')
-    ax3 = fig.add_subplot(133, projection='3d')
+    fig = plt.figure(figsize=(8.5, 3), dpi=150, facecolor='w')
+    ax1 = fig.add_subplot(131, projection='3d',aspect="equal")
+    ax2 = fig.add_subplot(132, projection='3d',aspect="equal")
+    ax3 = fig.add_subplot(133, projection='3d',aspect="equal")
     (bx,by,bz) = (length/2,length/2,length/2) # box.bounds
     subplots = [ax1,ax2,ax3]
     for i in range(len(subplots)):
@@ -220,9 +232,12 @@ def plot(positions,times,radii):
         ax.set_ylabel('y')
         ax.set_zlim3d([-bz, bz])
         ax.set_zlabel('z')
-        ax.set_title('DLA Test')
         ax.view_init(elev=10.0, azim=i*120)
-    figsize = fig.get_size_inches()*fig.dpi
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
+        ax.set_zticklabels([])
+
+    #subplotsize = ax1.get_size_inches()*fig.dpi
 
     # Organize simulation results for plotting
     totalTime = times[-1]
@@ -230,13 +245,18 @@ def plot(positions,times,radii):
     ys = [p[1] for p in positions]
     zs = [p[2] for p in positions]
     colors = [float(t)/totalTime for t in times]
-    sizes = [(r*figsize/length)**2 for r in radii]
+
     # Plot it, add colorbar
     for ax in subplots:
-        im = ax.scatter(xs,ys,zs,s=sizes,c=colors,cmap=cm.rainbow,edgecolors='face',alpha=1.0)
-    fig.colorbar(im, ax=ax3)
-    im.set_clim(0, totalTime)
+        for (xi,yi,zi,ri,ci) in zip(xs,ys,zs,radii,colors):
+            (x,y,z) = drawSphere(xi,yi,zi,ri)
+            ax.plot_surface(x, y, z,color=cm.rainbow(ci),
+                rstride=4, cstride=4,linewidth=0,shade=False)
+    #fig.colorbar(im)
+    #im.set_clim(0, totalTime)
    
+    
+
     plt.show()
 
     ## todo: save image
@@ -245,7 +265,7 @@ def plot(positions,times,radii):
 #  Main Program
 #==============================================================================
 length = 20 #length of grid
-rSpawn = 10 #spawn radius
+rSpawn = 4 #spawn radius
 dt = 1 # time step (arbitrary units)
 dr = 0.25 # distance step
 colRad = .4 #Collision radius
