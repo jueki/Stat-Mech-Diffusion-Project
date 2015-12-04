@@ -175,7 +175,7 @@ class Simulation:
     def newParticle(self):
         """Creates a new particle and evolves it until it collides with seed"""
         particle = Particle(randomPosition(self.spawnRad),radius=self.colRad, stickProb=self.prob)
-        
+
         while(self.inBounds(particle) and not self.collision(particle)):
             particle.step(self.stepSize)
             self.time += dt
@@ -186,6 +186,7 @@ class Simulation:
             particle.time = self.time
             self.allParticles.append(particle)
             self.grid.push(particle)
+            print 'Particle %d stuck!'%len(self.allParticles)
             
     def run(self, numParticles):
         """Runs the simulation until we have a certain amount of particles stuck
@@ -218,24 +219,25 @@ def drawSphere(xCenter, yCenter, zCenter, r):
 def plot(positions,times,radii):
     """ Creates 3 different perspective plots of the simulation results """
     # Set up figure
-    fig = plt.figure(figsize=(8.5, 3), dpi=150, facecolor='w')
-    ax1 = fig.add_subplot(131, projection='3d',aspect="equal")
-    ax2 = fig.add_subplot(132, projection='3d',aspect="equal")
-    ax3 = fig.add_subplot(133, projection='3d',aspect="equal")
+    fig = plt.figure(dpi=150, facecolor='grey')
+    fig.set_figwidth(8)
+    ax0 = fig.add_subplot(131, projection='3d',aspect="equal")
+    ax1 = fig.add_subplot(132, projection='3d',aspect="equal")
+    ax2 = fig.add_subplot(133, projection='3d',aspect="equal")
     (bx,by,bz) = (length/2,length/2,length/2) # box.bounds
-    subplots = [ax1,ax2,ax3]
+    subplots = [ax0,ax1,ax2]
+    fSize=10
     for i in range(len(subplots)):
         ax = subplots[i]
         ax.set_xlim3d([-bx, bx])
-        ax.set_xlabel('x')
         ax.set_ylim3d([-by, by])
-        ax.set_ylabel('y')
         ax.set_zlim3d([-bz, bz])
-        ax.set_zlabel('z')
         ax.view_init(elev=10.0, azim=i*120)
-        ax.set_xticklabels([])
-        ax.set_yticklabels([])
-        ax.set_zticklabels([])
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_zticks([])
+    plt.subplots_adjust(wspace=0.01,hspace=0.01)
+
 
     #subplotsize = ax1.get_size_inches()*fig.dpi
 
@@ -254,22 +256,18 @@ def plot(positions,times,radii):
                 rstride=4, cstride=4,linewidth=0,shade=False)
     #fig.colorbar(im)
     #im.set_clim(0, totalTime)
-   
-    
-
+    plt.savefig('fig.png',dpi=300, bbox_inches='tight')
     plt.show()
-
-    ## todo: save image
 
 #==============================================================================
 #  Main Program
 #==============================================================================
 length = 20 #length of grid
-rSpawn = 4 #spawn radius
+rSpawn = 15 #spawn radius
 dt = 1 # time step (arbitrary units)
 dr = 0.25 # distance step
-colRad = .4 #Collision radius
-numParticles = 5
+colRad = .5 #Collision radius
+numParticles = 500
 stickProb = 1
 
 # Set up the simulation and run it
