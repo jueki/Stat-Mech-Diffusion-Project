@@ -9,7 +9,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d
-import matplotlib.animation as animation
+import matplotlib.colors as clrs
 import matplotlib.cm as cm
 import random
 
@@ -216,10 +216,10 @@ def drawSphere(xCenter, yCenter, zCenter, r):
     z = r*z + zCenter
     return (x,y,z)
 
-def plot(positions,times,radii):
+def plot(positions,times):
     """ Creates 3 different perspective plots of the simulation results """
     # Set up figure
-    fig = plt.figure(dpi=150, facecolor='grey')
+    fig = plt.figure(facecolor='w')
     fig.set_figwidth(8)
     ax0 = fig.add_subplot(131, projection='3d',aspect="equal")
     ax1 = fig.add_subplot(132, projection='3d',aspect="equal")
@@ -238,9 +238,6 @@ def plot(positions,times,radii):
         ax.set_zticks([])
     plt.subplots_adjust(wspace=0.01,hspace=0.01)
 
-
-    #subplotsize = ax1.get_size_inches()*fig.dpi
-
     # Organize simulation results for plotting
     totalTime = times[-1]
     xs = [p[0] for p in positions]
@@ -248,23 +245,30 @@ def plot(positions,times,radii):
     zs = [p[2] for p in positions]
     colors = [float(t)/totalTime for t in times]
 
-    # Plot it, add colorbar
+    # Plot it
     for ax in subplots:
-        for (xi,yi,zi,ri,ci) in zip(xs,ys,zs,radii,colors):
-            (x,y,z) = drawSphere(xi,yi,zi,ri)
+        for (xi,yi,zi,ci) in zip(xs,ys,zs,colors):
+            (x,y,z) = drawSphere(xi,yi,zi,colRad)
             ax.plot_surface(x, y, z,color=cm.rainbow(ci),
                 rstride=4, cstride=4,linewidth=0,shade=False)
-    #fig.colorbar(im)
-    #im.set_clim(0, totalTime)
-    plt.savefig('fig.png',dpi=300, bbox_inches='tight')
+    
+    # Set up colorbar ###### STILL WORKING ON THIS
+    """
+    norm = clrs.Normalize(vmin=0,vmax=totalTime)
+    sm = cm.ScalarMappable(cmap=cm.rainbow, norm=norm)
+    sm.set_array([])
+    fig.colorbar(sm)
+    """
+    fileName = simName+'.png'
+    plt.savefig(fileName, dpi=300, bbox_inches='tight')
 
-def saveData(positions,times,radii,filename='data'):
+def saveData(positions,times,filename='data'):
     """ Saves simulation data to a file for later use"""
+    positions = [p.tolist() for p in positions]
     s = 'length = %d\nrSpawn = %d\ndr = %f\n'%(length,rSpawn,dr)
-    s += 'stickProb = %f\n'%stickProb
+    s += 'colRad = %f\nstickProb = %f\n'%(colRad,stickProb)
     s += 'positions = '+ str(positions)
     s += '\ntimes = '+ str(times)
-    s += '\nradii = '+ str(radii)
     f = open(filename, 'w')
     f.write(s)
     f.close()
@@ -272,6 +276,7 @@ def saveData(positions,times,radii,filename='data'):
 #==============================================================================
 #  Main Program
 #==============================================================================
+
 # Get inputs from user (with defaults)
 length = raw_input('Box side length: ')
 if not length: length = 100
@@ -281,7 +286,7 @@ print length
 while True: 
     rSpawn = raw_input('Spawn radius: ')
     if not rSpawn:
-        rSpawn = 30
+        rSpawn = 45
         break
     elif int(rSpawn) > length/2:
         print "Spawn radius too large."
@@ -293,7 +298,7 @@ print rSpawn
 dt = 1 # time step (arbitrary units)
 
 dr = raw_input('Distance step: ')
-if not dr: dr = 0.5
+if not dr: dr = 1
 else: dr = float(dr)
 print dr
 
@@ -312,6 +317,10 @@ if not numParticles: numParticles = 100
 else: numParticles = int(numParticles)
 print numParticles
 
+simName = raw_input('Simulation name: ')
+if not simName: simName = 'test'
+print simName
+
 # Set up the simulation and run it
 print 'Running simulation...'
 sim = Simulation(length, colRad, rSpawn, dr, stickProb)
@@ -324,9 +333,9 @@ radii = [p.radius for p in particles]
 times = [p.time for p in particles]
 
 # Save the data to file
-saveData(positions,times,radii,filename='data')
+saveData(positions,times,filename=simName)
 
 # Plot the data
 print 'Simulation done. Plotting...'
-plot(positions,times,radii)
+plot(positions,times)
 print 'Done.'
