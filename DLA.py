@@ -72,7 +72,6 @@ class Grid:
                     for z in range(length)]
         self.length = length
         
-        
     def inGrid(self, x, y, z):
         """Checks if this continous position is a valid position inside the grid"""
         gridPos = self.CTG([x,y,z])
@@ -187,7 +186,7 @@ class Simulation:
             particle.time = self.time
             self.allParticles.append(particle)
             self.grid.push(particle)
-            print 'Particle %d stuck!'%len(self.allParticles)
+            print 'Particle %d stuck!'%(len(self.allParticles) - 1)
             
     def run(self, numParticles):
         """Runs the simulation until we have a certain amount of particles stuck
@@ -233,7 +232,7 @@ def plotParticles(positions,times):
         ax.set_xlim3d([-bx, bx])
         ax.set_ylim3d([-by, by])
         ax.set_zlim3d([-bz, bz])
-        ax.view_init(elev=10.0, azim=i*120)
+        ax.view_init(elev=10.0, azim=i*120) #
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_zticks([])
@@ -276,7 +275,8 @@ def saveData(positions,times,filename='data'):
 
 def analyzeData(positions,times):
     """ looks at particles stuck and max radius vs. time and plots them"""
-    nStuck = range(len(times))
+    nStuck = range(len(times)) # number of particles stuck at each time
+    # Find max radius at each time
     maxRadii = []
     stickRadii = [np.linalg.norm(pos) for pos in positions]
     maxR = stickRadii[0]
@@ -284,9 +284,9 @@ def analyzeData(positions,times):
         if r > maxR:
             maxR = r
         maxRadii += [maxR]
-
+    print 'Maximum radius = %f'%maxR
+    # Set up plot
     fig = plt.figure(facecolor='w')
-
     plt.subplot(2, 1, 1)
     plt.plot(times, nStuck,'-')
     plt.ylabel('Particles Stuck')
@@ -294,9 +294,10 @@ def analyzeData(positions,times):
     plt.plot(times, maxRadii, '-')
     plt.xlabel('Time Steps')
     plt.ylabel('Maximum Radius')
-
+    # Save figure
     fileName = simName+'_anl.png'
     plt.savefig(fileName, dpi=300, bbox_inches='tight')
+    
 #==============================================================================
 #  Main Program
 #==============================================================================
@@ -349,7 +350,7 @@ print 'Running simulation...'
 start_time = time.time()
 sim = Simulation(length, colRad, rSpawn, dr, stickProb)
 sim.run(numParticles)
-runTime = time.time() - start_time
+runTime = time.time() - start_time # the runtime in seconds
 
 # Obtain Particle Information
 particles = sim.getParticles()
@@ -358,7 +359,7 @@ radii = [p.radius for p in particles]
 times = [p.time for p in particles]
 
 # Save the data to file
-saveData(positions,times,filename=simName)
+saveData(positions,times,filename=simName+'_data')
 
 # Plot the data
 print 'Simulation done in %d seconds. Plotting...'%runTime
