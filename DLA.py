@@ -38,7 +38,6 @@ class Particle:
 	def move(self,newPosition):
 		self.position = np.array(newPosition)
   
-  
 	def decision(self):
 		""" checks if particle has collided with another particle """
 		return random.random() < self.stickProb
@@ -63,8 +62,6 @@ class Particle:
 		""" Returns the (x,y,z) position of the particle """
 		return self.position
   
-
-
 class Grid:
     """The 3d grid that holds the position of each partice"""
     
@@ -206,61 +203,66 @@ class Simulation:
         for x in range(len(self.allParticles)):
             print(self.allParticles[x].getPosition())
 
-def animate(i):
-    if dt*i in times:
-        position = positions.pop(0)
-        time = times.pop(0)
-        radius = radii.pop(0)
-        (x,y,z) = (position[0],position[1],position[2])
-        area = 1200*(radius*figsize/length)**2
-        color = cm.rainbow(float(i*dt)/totalTime)
-        ax.scatter(x,y,z,s=area,c=color,edgecolors='face')
-
-#ani = animation.FuncAnimation(fig, animate, interval=dt, blit=False)
-
 def plot(positions,times,radii):
+    """ Creates 3 different perspective plots of the simulation results """
+    # Set up figure
+    fig = plt.figure()
+    ax1 = fig.add_subplot(131, projection='3d')
+    ax2 = fig.add_subplot(132, projection='3d')
+    ax3 = fig.add_subplot(133, projection='3d')
+    (bx,by,bz) = (length/2,length/2,length/2) # box.bounds
+    subplots = [ax1,ax2,ax3]
+    for i in range(len(subplots)):
+        ax = subplots[i]
+        ax.set_xlim3d([-bx, bx])
+        ax.set_xlabel('x')
+        ax.set_ylim3d([-by, by])
+        ax.set_ylabel('y')
+        ax.set_zlim3d([-bz, bz])
+        ax.set_zlabel('z')
+        ax.set_title('DLA Test')
+        ax.view_init(elev=10.0, azim=i*120)
+    figsize = fig.get_size_inches()*fig.dpi
+
+    # Organize simulation results for plotting
+    totalTime = times[-1]
     xs = [p[0] for p in positions]
     ys = [p[1] for p in positions]
     zs = [p[2] for p in positions]
-    colors = [cm.rainbow(float(t)/totalTime) for t in times]
+    colors = [float(t)/totalTime for t in times]
     sizes = [(r*figsize/length)**2 for r in radii]
-    ax.scatter(xs,ys,zs,s=sizes,c=colors,edgecolors='face',alpha=1.0)
+    # Plot it, add colorbar
+    for ax in subplots:
+        im = ax.scatter(xs,ys,zs,s=sizes,c=colors,cmap=cm.rainbow,edgecolors='face',alpha=1.0)
+    fig.colorbar(im, ax=ax3)
+    im.set_clim(0, totalTime)
+   
+    plt.show()
 
-########## MAIN PROGRAM #############
+    ## todo: save image
+
+#==============================================================================
+#  Main Program
+#==============================================================================
 length = 20 #length of grid
-rSpawn = 7 #spawn radius
-dt = 50 # time step in milliseconds
+rSpawn = 10 #spawn radius
+dt = 1 # time step (arbitrary units)
 dr = 0.25 # distance step
 colRad = .4 #Collision radius
-stickProb = .5
-numParticles = 1000
+numParticles = 5
+stickProb = 1
 
-
-#Set Up the simulation and run it
+# Set up the simulation and run it
+print 'Running simulation...'
 sim = Simulation(length, colRad, rSpawn, dr, stickProb)
 sim.run(numParticles)
+print 'Simulation done. Plotting...'
 
-#Obtain Particle Information
+# Obtain Particle Information
 particles = sim.getParticles()
 positions = [p.position for p in particles]
 radii = [p.radius for p in particles]
 times = [p.time for p in particles]
-totalTime = times[-1]
 
-# setting up 3d figure
-fig = plt.figure()
-ax = p3.Axes3D(fig)
-(bx,by,bz) = (length/2,length/2,length/2) # box.bounds
-ax.set_xlim3d([-bx, bx])
-ax.set_xlabel('x')
-ax.set_ylim3d([-by, by])
-ax.set_ylabel('y')
-ax.set_zlim3d([-bz, bz])
-ax.set_zlabel('z')
-ax.set_title('DLA Test')
-
-figsize = fig.get_size_inches()*fig.dpi
-
+# Plot the data
 plot(positions,times,radii)
-
-plt.show()
