@@ -257,13 +257,17 @@ def plot(positions,times,radii):
     #fig.colorbar(im)
     #im.set_clim(0, totalTime)
     plt.savefig('fig.png',dpi=300, bbox_inches='tight')
-    plt.show()
+
+def saveData(positions,times,radii,filename='data'):
+    """ saves simulation data to a file for later use"""
+    #todo
+    return
 
 #==============================================================================
 #  Main Program
 #==============================================================================
 length = 20 #length of grid
-rSpawn = 15 #spawn radius
+rSpawn = 18 #spawn radius
 dt = 1 # time step (arbitrary units)
 dr = 0.25 # distance step
 colRad = .5 #Collision radius
@@ -284,3 +288,4 @@ times = [p.time for p in particles]
 
 # Plot the data
 plot(positions,times,radii)
+print 'Done.'
