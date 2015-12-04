@@ -205,7 +205,7 @@ class Simulation:
             print(self.allParticles[x].getPosition())
 
 def drawSphere(xCenter, yCenter, zCenter, r):
-    #draw sphere
+    """" Sets up a sphere drawing for plotting """
     u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
     x=np.cos(u)*np.sin(v)
     y=np.sin(u)*np.sin(v)
@@ -259,26 +259,63 @@ def plot(positions,times,radii):
     plt.savefig('fig.png',dpi=300, bbox_inches='tight')
 
 def saveData(positions,times,radii,filename='data'):
-    """ saves simulation data to a file for later use"""
-    #todo
-    return
+    """ Saves simulation data to a file for later use"""
+    s = 'length = %d\nrSpawn = %d\ndr = %f\n'%(length,rSpawn,dr)
+    s += 'stickProb = %f\n'%stickProb
+    s += 'positions = '+ str(positions)
+    s += '\ntimes = '+ str(times)
+    s += '\nradii = '+ str(radii)
+    f = open(filename, 'w')
+    f.write(s)
+    f.close()
 
 #==============================================================================
 #  Main Program
 #==============================================================================
-length = 20 #length of grid
-rSpawn = 18 #spawn radius
+# Get inputs from user (with defaults)
+length = raw_input('Box side length: ')
+if not length: length = 100
+else: length = int(length)
+print length
+
+while True: 
+    rSpawn = raw_input('Spawn radius: ')
+    if not rSpawn:
+        rSpawn = 30
+        break
+    elif int(rSpawn) > length/2:
+        print "Spawn radius too large."
+    else:
+        rSpawn = int(rSpawn)
+        break
+print rSpawn
+
 dt = 1 # time step (arbitrary units)
-dr = 0.25 # distance step
-colRad = .5 #Collision radius
-numParticles = 500
-stickProb = 1
+
+dr = raw_input('Distance step: ')
+if not dr: dr = 0.5
+else: dr = float(dr)
+print dr
+
+colRad = raw_input('Particle radius: ')
+if not colRad: colRad = 1
+else: colRad = float(colRad)
+print colRad
+
+stickProb = raw_input('Sticking probability (0-1): ')
+if not stickProb: stickProb = 1
+else: stickProb = float(stickProb)
+print stickProb
+
+numParticles = raw_input('Number of particles: ')
+if not numParticles: numParticles = 100
+else: numParticles = int(numParticles)
+print numParticles
 
 # Set up the simulation and run it
 print 'Running simulation...'
 sim = Simulation(length, colRad, rSpawn, dr, stickProb)
 sim.run(numParticles)
-print 'Simulation done. Plotting...'
 
 # Obtain Particle Information
 particles = sim.getParticles()
@@ -286,6 +323,10 @@ positions = [p.position for p in particles]
 radii = [p.radius for p in particles]
 times = [p.time for p in particles]
 
+# Save the data to file
+saveData(positions,times,radii,filename='data')
+
 # Plot the data
+print 'Simulation done. Plotting...'
 plot(positions,times,radii)
 print 'Done.'
