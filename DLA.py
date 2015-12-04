@@ -12,6 +12,7 @@ import mpl_toolkits.mplot3d.axes3d
 import matplotlib.colors as clrs
 import matplotlib.cm as cm
 import random
+import time
 
 def fromSphericalCoordinates(r,theta,phi):
 	""" converts from spherical to cartesian coordinates """
@@ -216,14 +217,14 @@ def drawSphere(xCenter, yCenter, zCenter, r):
     z = r*z + zCenter
     return (x,y,z)
 
-def plot(positions,times):
+def plotParticles(positions,times):
     """ Creates 3 different perspective plots of the simulation results """
     # Set up figure
     fig = plt.figure(facecolor='w')
     fig.set_figwidth(8)
-    ax0 = fig.add_subplot(131, projection='3d',aspect="equal")
-    ax1 = fig.add_subplot(132, projection='3d',aspect="equal")
-    ax2 = fig.add_subplot(133, projection='3d',aspect="equal")
+    ax0 = fig.add_subplot(131, projection='3d',aspect='equal')
+    ax1 = fig.add_subplot(132, projection='3d',aspect='equal')
+    ax2 = fig.add_subplot(133, projection='3d',aspect='equal')
     (bx,by,bz) = (length/2,length/2,length/2) # box.bounds
     subplots = [ax0,ax1,ax2]
     fSize=10
@@ -259,24 +260,46 @@ def plot(positions,times):
     sm.set_array([])
     fig.colorbar(sm)
     """
-    fileName = simName+'.png'
+    fileName = simName+'_pp.png'
     plt.savefig(fileName, dpi=300, bbox_inches='tight')
 
 def saveData(positions,times,filename='data'):
     """ Saves simulation data to a file for later use"""
     positions = [p.tolist() for p in positions]
     s = 'length = %d\nrSpawn = %d\ndr = %f\n'%(length,rSpawn,dr)
-    s += 'colRad = %f\nstickProb = %f\n'%(colRad,stickProb)
+    s += 'colRad = %f\nstickProb = %f\nsimName = %s\n'%(colRad,stickProb,simName)
     s += 'positions = '+ str(positions)
     s += '\ntimes = '+ str(times)
     f = open(filename, 'w')
     f.write(s)
     f.close()
 
+def analyzeData(positions,times):
+    """ looks at particles stuck and max radius vs. time and plots them"""
+    nStuck = range(len(times))
+    maxRadii = []
+    stickRadii = [np.linalg.norm(pos) for pos in positions]
+    maxR = stickRadii[0]
+    for r in stickRadii:
+        if r > maxR:
+            maxR = r
+        maxRadii += [maxR]
+
+    fig = plt.figure(facecolor='w')
+
+    plt.subplot(2, 1, 1)
+    plt.plot(times, nStuck,'-')
+    plt.ylabel('Particles Stuck')
+    plt.subplot(2, 1, 2)
+    plt.plot(times, maxRadii, '-')
+    plt.xlabel('Time Steps')
+    plt.ylabel('Maximum Radius')
+
+    fileName = simName+'_anl.png'
+    plt.savefig(fileName, dpi=300, bbox_inches='tight')
 #==============================================================================
 #  Main Program
 #==============================================================================
-
 # Get inputs from user (with defaults)
 length = raw_input('Box side length: ')
 if not length: length = 100
@@ -323,8 +346,10 @@ print simName
 
 # Set up the simulation and run it
 print 'Running simulation...'
+start_time = time.time()
 sim = Simulation(length, colRad, rSpawn, dr, stickProb)
 sim.run(numParticles)
+runTime = time.time() - start_time
 
 # Obtain Particle Information
 particles = sim.getParticles()
@@ -336,6 +361,9 @@ times = [p.time for p in particles]
 saveData(positions,times,filename=simName)
 
 # Plot the data
-print 'Simulation done. Plotting...'
-plot(positions,times)
+print 'Simulation done in %d seconds. Plotting...'%runTime
+plotParticles(positions,times)
 print 'Done.'
+
+# Analyze data and plot
+analyzeData(positions,times)
