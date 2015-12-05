@@ -285,6 +285,12 @@ def analyzeData(positions,times):
             maxR = r
         maxRadii += [maxR]
     print 'Maximum radius = %f'%maxR
+    gyrX = radiusOfGyration(positions, 0)
+    gyrY = radiusOfGyration(positions, 1)
+    gyrZ = radiusOfGyration(positions, 2)
+    print ("Radius of Gyration x: %f"%gyrX)
+    print ("Radius of Gyration y: %f"%gyrY)
+    print ("Radius of Gyration z: %f"%gyrZ)
     # Set up plot
     fig = plt.figure(facecolor='w')
     plt.subplot(2, 1, 1)
@@ -297,6 +303,18 @@ def analyzeData(positions,times):
     # Save figure
     fileName = simName+'_anl.png'
     plt.savefig(fileName, dpi=300, bbox_inches='tight')
+    
+def radiusOfGyration(positions, axis):
+    """ Calculate the radius of gyration for a collection of particles
+    about a given axis: 0=x, 1=y, 2=z"""
+    inertia = 0
+    numParticles = len(positions)
+    a = (axis+1)%3
+    b = (axis+2)%3
+    for pos in positions:
+        inertia += (pos[a]**2 + pos[b]**2)
+    radius = inertia/numParticles
+    return radius
     
 #==============================================================================
 #  Main Program
