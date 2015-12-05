@@ -269,7 +269,7 @@ def saveData(positions,times,filename='data'):
     s += 'colRad = %f\nstickProb = %f\nsimName = %s\n'%(colRad,stickProb,simName)
     s += 'positions = '+ str(positions)
     s += '\ntimes = '+ str(times)
-    f = open(filename, 'w')
+    f = open(filename, 'w+')
     f.write(s)
     f.close()
 
