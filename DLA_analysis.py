@@ -118,11 +118,11 @@ def radiusOfGyration(positions, axis):
 #  Main Program
 #==============================================================================
 # Put the data here
-length = 50
+#length = 50
 simName = 'plttest2'
 
 # Plot the data
-plotParticles(positions,times)
+#plotParticles(positions,times)
 
 # Analyze data and plot
 analyzeData(positions,times)
