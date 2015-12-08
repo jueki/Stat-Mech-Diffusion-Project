@@ -6,17 +6,11 @@
 #  Program to analyze and plot DLA data.
 #==============================================================================
 
-import numpy as np
+from pylab import * # this includes numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d
 import matplotlib.colors as clrs
 import matplotlib.cm as cm
-import random
-import time
-
-
-#### data goes here 
-
 
 def drawSphere(xCenter, yCenter, zCenter, r):
     """" Sets up a sphere drawing for plotting """
@@ -98,10 +92,6 @@ def analyzeData(positions,times):
     fig = plt.figure(facecolor='w')
     plt.subplot(2, 1, 1)
     plt.plot(times, nStuck,'b-')
-    popt = fitCurve(times)
-    xx = np.linspace(0,)
-    yy = func(xx, *popt)
-    plt.plot(xx,yy,'r-',)
     plt.ylabel('Particles Stuck')
     plt.subplot(2, 1, 2)
     plt.plot(times, maxRadii, 'b-')
@@ -122,21 +112,15 @@ def radiusOfGyration(positions, axis):
         inertia += (pos[a]**2 + pos[b]**2)
     radius = inertia/numParticles
     return radius
-
-def fitCurve(times):
-    """ fits position sticking data to exponential curve """
-    y = np.array(range(len(times)))
-    x = np.array(times)
-    popt, pcov = curve_fit(func, x, y, p0=(1000, 1, 0))
-    print popt
-    return popt
-
-def func(x, a, c, d):
-    return a*np.exp(c*x)+d    
+ 
 
 #==============================================================================
 #  Main Program
 #==============================================================================
+# Put the data here
+length = 50
+simName = 'plttest2'
+
 # Plot the data
 plotParticles(positions,times)
 
